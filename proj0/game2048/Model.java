@@ -1,11 +1,12 @@
 package game2048;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author shadoxx
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -110,9 +111,19 @@ public class Model extends Observable {
         boolean changed;
         changed = false;
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
+        String originalBoard = board.toString();
+
+        board.setViewingPerspective(side);
+
+        for (int i = 0; i < 4; i++) {
+            tiltOneColumn(i);
+        }
+
+        board.setViewingPerspective(Side.NORTH);
+
+        if (!board.toString().equals(originalBoard)) {
+            changed = true;
+        }
 
         checkGameOver();
         if (changed) {
@@ -121,6 +132,42 @@ public class Model extends Observable {
         return changed;
     }
 
+    private void tiltOneColumn(int col) {
+        int insertRow = 3; // 从最顶开始插入
+        boolean[] merged = new boolean[4]; // 标记每一行是否已被合并过
+        Tile[] originalTiles = new Tile[4];
+
+        // 收集当前列的 tile，从底到顶（row=0 到 row=3）
+        for (int row = 0; row < 4; row++) {
+            originalTiles[row] = board.tile(col, row);
+        }
+
+        for (int row = 3; row >= 0; row--) {
+            Tile tile = originalTiles[row];
+            if (tile == null) continue;
+
+            int targetRow = insertRow;
+
+            // 尝试向上找一个可以合并的 tile
+            while (targetRow < 3 && board.tile(col, targetRow + 1) == null) {
+                targetRow++;
+            }
+
+            Tile topTile = board.tile(col, targetRow);
+            if (topTile != null && topTile.value() == tile.value() && !merged[targetRow]) {
+                // 合并
+                board.move(col, targetRow, tile);
+                score += tile.value() * 2;
+                merged[targetRow] = true;
+            } else {
+                // 不合并，移动到 insertRow
+                if (row != insertRow) {
+                    board.move(col, insertRow, tile);
+                }
+                insertRow--;
+            }
+        }
+    }
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
      */
@@ -137,7 +184,14 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        for (int  i = 0; i < b.size(); i++) {
+            for  (int j = 0; j < b.size(); j++) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -147,7 +201,14 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (b.tile(i, j) != null && b.tile(i, j).value() ==  MAX_PIECE ) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -158,7 +219,25 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        int[][] directions = {{0, 1}, {1, 0}};
+        int size = b.size();
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+
+                for (int[] dir : directions) {
+                    int ni = i + dir[0], nj = j + dir[1];
+
+                    if (ni < size && nj < size) {
+                        if (b.tile(ni, nj) == null || b.tile(ni, nj).value() == b.tile(i, j).value()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
         return false;
     }
 

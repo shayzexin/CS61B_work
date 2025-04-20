@@ -1,14 +1,17 @@
 package deque;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LinkedListDeque<T> implements Deque<T> {
-    static class Node<E> {
-        private E item;
-        private Node<E> prev;
-        private Node<E> next;
+    class Node {
+        private T item;
+        private Node prev;
+        private Node next;
 
-        private Node(E item, Node<E> prev, Node<E> next) {
+        private Node(T item, Node prev, Node next) {
             this.item = item;
             this.prev = prev;
             this.next = next;
@@ -16,53 +19,33 @@ public class LinkedListDeque<T> implements Deque<T> {
 
         private Node() {
             this.item = null;
-            this.prev = this;
-            this.next = this;
+            this.prev = null;
+            this.next = null;
         }
     }
 
-    private final Node<T> sentinel;
+    private final Node sentinel;
     private int size;
 
     public LinkedListDeque() {
-        sentinel = new Node<>();
         size = 0;
+        sentinel = new Node();
+        sentinel.prev = sentinel.next = sentinel;
     }
 
     @Override
     public void addFirst(T item) {
-        if (isEmpty() || getHead() == null) {
-            addFirstNodeOfList(item);
-            return;
-        }
-
-        Node<T> headNode = getHead();
-        Node<T> newNode = new Node<>(item, sentinel, headNode);
-
-        sentinel.prev = newNode;
-        headNode.prev = newNode;
+        Node newNode = new Node(item, sentinel, sentinel.next);
+        sentinel.next.prev = newNode;
+        sentinel.next = newNode;
         size++;
     }
 
     @Override
     public void addLast(T item) {
-        if (isEmpty() || getTail() == null) {
-            addFirstNodeOfList(item);
-            return;
-        }
-
-        Node<T> tailNode = getTail();
-        Node<T> newNode = new Node<>(item, tailNode, sentinel);
-
-        sentinel.next = newNode;
-        tailNode.next = newNode;
-        size++;
-    }
-
-    private void addFirstNodeOfList(T item) {
-        Node<T> newNode = new Node<>(item, sentinel, sentinel);
+        Node newNode = new Node(item, sentinel.prev, sentinel);
+        sentinel.prev.next = newNode;
         sentinel.prev = newNode;
-        sentinel.next = newNode;
 
         size++;
     }
@@ -79,137 +62,99 @@ public class LinkedListDeque<T> implements Deque<T> {
 
     @Override
     public void printDeque() {
-        if (isEmpty() || getHead() == null) {
-            System.out.println();
-            return;
-        }
-
-        Node<T> current = getHead();
-
+        Node current = sentinel.next;
         while (current != sentinel) {
-            System.out.print(current.item);
+            System.out.print(current.item + " ");
             current = current.next;
-
-            if (current != sentinel) {
-                System.out.print(" ");
-            }
         }
-
         System.out.println();
     }
 
     @Override
     public T removeFirst() {
-        if (isEmpty() || getHead() == null) {
-//            throw new NoSuchElementException("LinkedListDeque is empty");
-            return null;
-        }
+        Node tmp = sentinel.next;
+        sentinel.next = sentinel.next.next;
+        sentinel.next.prev = sentinel;
 
-        if (size == 1) {
-            return removeLastNodeOfList();
-        }
-
-        Node<T> headNode = getHead();
-        T item = headNode.item;
-
-        sentinel.prev = headNode.next;
-        headNode.next.prev = sentinel;
-
-        headNode.prev = null;
-        headNode.next = null;
-        headNode.item = null;
-
-        size--;
-        return item;
+        size = (size == 0) ? size : size - 1;
+        return (T) tmp.item;
     }
 
     @Override
     public T removeLast() {
-        if (isEmpty() || getTail() == null) {
-//            throw new NoSuchElementException("LinkedListDeque is empty");
-            return null;
-        }
+        Node tmp = sentinel.prev;
+        sentinel.prev = sentinel.prev.prev;
+        sentinel.prev.next = sentinel;
 
-        if (size == 1) {
-            return removeLastNodeOfList();
-        }
-
-        Node<T> tailNode = getTail();
-        T item = tailNode.item;
-
-        sentinel.next = tailNode.prev;
-        tailNode.prev.next = sentinel;
-
-        tailNode.prev = null;
-        tailNode.next = null;
-        tailNode.item = null;
-
-        size--;
-        return item;
-    }
-
-    private T removeLastNodeOfList() {
-        Node<T> theLastNode = getHead();
-
-        if (theLastNode == null) {
-            throw new NoSuchElementException("LinkedListDeque is empty");
-        }
-
-        T item = theLastNode.item;
-
-        sentinel.prev = sentinel;
-        sentinel.next = sentinel;
-
-        theLastNode.prev = null;
-        theLastNode.next = null;
-        theLastNode.item = null;
-
-        size--;
-        return item;
+        size = (size == 0) ? size : size - 1;
+        return (T) tmp.item;
     }
 
     @Override
     public T get(int index) {
-        if (index >= size || index < 0) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", size: " + size);
-        }
-
-        Node<T> current = getHead();
-
-        for (int i = 0; i < index; i++) {
-            if (current == null) {
-                throw new IndexOutOfBoundsException("Index: " + index + ", size: " + size);
-            }
+        Node current = sentinel.next;
+        while (current != sentinel && index > 0) {
             current = current.next;
+            index--;
         }
-
-        if (current == null) {
-            throw new RuntimeException();
-        }
-        return current.item;
+        return (index == 0) ? (T) current.item : null;
     }
 
     public T getRecursive(int index) {
-        if (index >= size || index < 0) {
-//            throw new IndexOutOfBoundsException("Index: " + index + ", size: " + size);
-            return null;
-        }
-
-        return getRecursiveHelper(index, sentinel.prev);
+        return getRecursiveHelper(index, sentinel.next);
     }
 
-    private T getRecursiveHelper(int index, Node<T> current) {
+    private T getRecursiveHelper(int index, Node current) {
+        if (current == sentinel) {
+            return null;
+        }
         if (index == 0) {
-            return current.item;
+            return (T) current.item;
         }
         return getRecursiveHelper(index - 1, current.next);
     }
 
-    private Node<T> getHead() {
-        return isEmpty() ? null : sentinel.prev;
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
     }
 
-    private Node<T> getTail() {
-        return isEmpty() ? null : sentinel.next;
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private Node ptr;
+        LinkedListDequeIterator() {
+            ptr = sentinel.next;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (ptr != sentinel);
+        }
+
+        @Override
+        public T next() {
+            T item = (T) ptr.item;
+            ptr = ptr.next;
+            return item;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+
+        Deque other = (Deque) o;
+        if (size != other.size()) {
+            return false;
+        }
+
+        Node current = sentinel.next;
+        for (int i = 0; i < size; i++) {
+            if (!current.item.equals(other.get(i))) {
+                return false;
+            }
+            current = current.next;
+        }
+        return true;
     }
 }

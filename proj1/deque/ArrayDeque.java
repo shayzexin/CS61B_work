@@ -1,11 +1,5 @@
 package deque;
-
-import sun.tools.tree.NaryExpression;
-
 import java.util.Iterator;
-
-import static java.lang.Math.max;
-
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     protected T[] items;
     protected int size;

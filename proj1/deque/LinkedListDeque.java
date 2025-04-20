@@ -1,9 +1,5 @@
 package deque;
-
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 public class LinkedListDeque<T> implements Deque<T> {
     class Node {

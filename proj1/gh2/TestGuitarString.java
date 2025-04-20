@@ -12,15 +12,67 @@ import static org.junit.Assert.*;
  */
 public class TestGuitarString  {
 
+    private static final double C4 = 261.63;
+    private static final double D4 = 293.66;
+    private static final double E4 = 329.63;
+    private static final double F4 = 349.23;
+    private static final double G4 = 392.00;
+    private static final double A4 = 440.00;
+    private static final double B4 = 493.88;
+
     @Test
-    public void testPluckTheAString() {
-        GuitarString aString = new GuitarString(GuitarHeroLite.CONCERT_A);
-        aString.pluck();
-        for (int i = 0; i < 50000; i += 1) {
-            StdAudio.play(aString.sample());
-            aString.tic();
+    public void playHaruNoHikageRiff() {
+        // 模拟前奏吉他riff
+        playNote(E4, 0.3);
+        playNote(G4, 0.3);
+        playNote(A4, 0.6);
+        playNote(E4, 0.3);
+        playNote(G4, 0.3);
+        playNote(B4, 0.6);
+
+        // 加入副歌部分
+        playChord(new double[]{E4, G4, B4}, 1.0);
+        playChord(new double[]{D4, F4, A4}, 1.0);
+    }
+
+    private void playNote(double frequency, double duration) {
+        GuitarString string = new GuitarString(frequency);
+        string.pluck();
+
+        int samples = (int) (44100 * duration);
+        for (int i = 0; i < samples; i++) {
+            StdAudio.play(string.sample());
+            string.tic();
         }
     }
+
+    private void playChord(double[] frequencies, double duration) {
+        GuitarString[] strings = new GuitarString[frequencies.length];
+        for (int i = 0; i < frequencies.length; i++) {
+            strings[i] = new GuitarString(frequencies[i]);
+            strings[i].pluck();
+        }
+
+        int samples = (int) (44100 * duration);
+        for (int i = 0; i < samples; i++) {
+            double sample = 0;
+            for (GuitarString s : strings) {
+                sample += s.sample();
+                s.tic();
+            }
+            StdAudio.play(sample / strings.length); // 平均混合
+        }
+    }
+
+//    @Test
+//    public void testPluckTheAString() {
+//        GuitarString aString = new GuitarString(GuitarHeroLite.CONCERT_A);
+//        aString.pluck();
+//        for (int i = 0; i < 50000; i += 1) {
+//            StdAudio.play(aString.sample());
+//            aString.tic();
+//        }
+//    }
 
     @Test
     public void testSample() {

@@ -1,7 +1,7 @@
 package bstmap;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -113,4 +113,25 @@ public class TestBSTMapExtra {
         assertEquals(null, noChild.get('Z'));
     }
 
-}
+    @Test
+    public void testBSTIteratorInOrderTraversal() {
+        // 准备测试数据
+        BSTMap<Integer, String> tree = new BSTMap<>();
+        tree.put(5, "five");
+        tree.put(3, "three");
+        tree.put(7, "seven");
+        tree.put(2, "two");
+        tree.put(4, "four");
+
+        // 执行遍历
+        List<Integer> actualKeys = new ArrayList<>();
+        Iterator<Integer> it = tree.iterator();
+        while (it.hasNext()) {
+            actualKeys.add(it.next());
+        }
+
+        // 验证结果（BST中序遍历应为升序）
+        List<Integer> expectedKeys = Arrays.asList(2, 3, 4, 5, 7);
+        assertEquals("Iterator should return keys in ascending order", expectedKeys,
+                actualKeys);
+    }}

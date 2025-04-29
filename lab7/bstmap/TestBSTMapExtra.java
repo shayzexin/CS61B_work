@@ -134,4 +134,18 @@ public class TestBSTMapExtra {
         List<Integer> expectedKeys = Arrays.asList(2, 3, 4, 5, 7);
         assertEquals("Iterator should return keys in ascending order", expectedKeys,
                 actualKeys);
-    }}
+
+    }
+
+    @Test
+    public void testPrint() {
+        BSTMap<Integer, String> tree = new BSTMap<>();
+        tree.put(5, "five");
+        tree.put(3, "three");
+        tree.put(7, "seven");
+        tree.put(2, "two");
+        tree.put(4, "four");
+
+        tree.printInOrder();
+    }
+}

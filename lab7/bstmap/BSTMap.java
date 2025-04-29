@@ -25,10 +25,10 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>{
         size = 0;
     }
 
-    public void printInorder() {
+    public void printInOrder() {
         Iterator<K> iterator = iterator();
 
-        if (iterator.hasNext()) {
+        while (iterator.hasNext()) {
             System.out.print(iterator.next() + " ");
         }
     }

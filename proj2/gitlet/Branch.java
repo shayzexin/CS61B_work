@@ -1,26 +1,28 @@
 package gitlet;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class Branch {
-    private String name;
-    private String furtherCommitId;
-    private String id;
-
-    public Branch(String name, String furtherCommitId) {
-        this.name = name;
-        this.furtherCommitId = furtherCommitId;
-        this.id = getID();
+    public static void save(String name, String commitId) {
+        File path = Utils.join(Repository.REF_DIR, name);
+        Utils.writeContents(path, commitId);
     }
 
-    private String getID() {
-        return name + ":" + furtherCommitId;
+    public static String getCommitFromBranch(String name) {
+        File path = Utils.join(Repository.REF_DIR, name);
+        return Utils.readContentsAsString(path);
     }
 
-    public String save() {
-        File branchPath = Utils.join(Repository.HEADS_DIR, name);
-        Utils.writeContents(branchPath, furtherCommitId);
+    public static String getCurrentHead() {
+        return Utils.readContentsAsString(Repository.HEAD_FILE);
+    }
 
-        return id;
+    public static void setCurrentHead(String name) {
+        Utils.writeContents(Repository.HEAD_FILE, name);
+    }
+
+    public static void setHeadCommitOfBranch(File file, String commitId) {
+        Utils.writeContents(file, commitId);
     }
 }

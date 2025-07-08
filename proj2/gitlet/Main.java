@@ -25,9 +25,6 @@ public class Main {
             entry("merge", new MergeCommand())
     );
 
-    /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *  <COMMAND> <OPERAND1> <OPERAND2> ... 
-     */
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please enter a command.");
@@ -42,13 +39,13 @@ public class Main {
             System.exit(0);
         }
 
-        if (command.requiresRepo() && !Repository.exists()) {
-            System.out.println("Not in an initialized Gitlet directory.");
+        if (command.isArgumentIllegal(args)) {
+            System.out.println("Incorrect operands.");
             System.exit(0);
         }
 
-        if (command.isArgumentIllegal(args)) {
-            System.out.println("Incorrect operands.");
+        if (command.requiresRepo() && !Repository.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
             System.exit(0);
         }
 

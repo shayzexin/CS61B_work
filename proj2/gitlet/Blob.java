@@ -4,27 +4,37 @@ import java.io.File;
 import java.io.Serializable;
 
 public class Blob implements Serializable {
-    private final byte[] content;
+    private byte[] content;
+    private String contentString;
     private String id;
 
     public Blob(File file) {
         this.content = Utils.readContents(file);
-        this.id = convertHash();
+        this.contentString = Utils.readContentsAsString(file);
+        this.id = sha1();
     }
 
-    public String save() {
-        File blobPath = Utils.join(Repository.OBJECT_DIR, "blob_" + id);
-        Utils.writeObject(blobPath, Utils.serialize(this));
-
-        return id;
+    private String sha1() {
+        return Utils.sha1(
+                Utils.sha1(contentString)
+        );
     }
 
-    private String convertHash() {
-        return Utils.sha1((Object) this.content);
+    public byte[] getContent() {
+        return this.content;
     }
 
-    @Override
-    public String toString() {
-        return id;
+    public String getId() {
+        return this.id;
+    }
+
+    public void save() {
+        File path = Utils.join(Repository.BLOB_DIR, id);
+        Utils.writeObject(path, this);
+    }
+
+    public static Blob getBlob(String id) {
+        File path = Utils.join(Repository.BLOB_DIR, id);
+        return Utils.readObject(path, Blob.class);
     }
 }

@@ -3,7 +3,7 @@ package gitlet.commands;
 public class MergeCommand implements Command{
     @Override
     public void execute(String[] args) {
-
+        System.out.println("Not implement");
     }
 
     @Override
@@ -13,6 +13,6 @@ public class MergeCommand implements Command{
 
     @Override
     public boolean isArgumentIllegal(String[] args) {
-        return false;
+        return args.length != 2;
     }
 }
